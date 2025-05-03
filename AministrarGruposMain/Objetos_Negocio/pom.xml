@@ -6,22 +6,10 @@
         <artifactId>AministrarGruposMain</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>Presentacion_AdmGrupo</artifactId>
+    <artifactId>Objetos_Negocio</artifactId>
     <packaging>jar</packaging>
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>Objetos_Negocio</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>DTO_Negocio</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
-        <exec.mainClass>com.mycompany.presentacion_admgrupo.Presentacion_AdmGrupo</exec.mainClass>
+        <exec.mainClass>com.mycompany.objetos_negocio.Objetos_Negocio</exec.mainClass>
     </properties>
 </project>

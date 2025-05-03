@@ -7,6 +7,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>Presentacion_AdmGrupo</module>
+        <module>Objetos_Negocio</module>
+        <module>DTO_Negocio</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

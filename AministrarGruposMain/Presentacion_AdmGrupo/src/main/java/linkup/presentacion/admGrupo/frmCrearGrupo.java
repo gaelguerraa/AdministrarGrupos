@@ -4,6 +4,14 @@
  */
 package linkup.presentacion.admGrupo;
 
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import linkup.dtosnegocio.admGrupo.GrupoDTO;
+import linkup.dtosnegocio.admGrupo.UsuariosMock;
+import linkup.objetosNegocio.admGrupo.Usuario;
 import linkup.presentacion.control.admGrupo.ControlAdministrarGrupo;
 
 /**
@@ -20,6 +28,77 @@ public class frmCrearGrupo extends javax.swing.JFrame {
     public frmCrearGrupo(ControlAdministrarGrupo controlador) {
         this.controlador = controlador;
         initComponents();
+        LlenarTablaMiembrosAInvitar();
+    }
+    
+    public void LlenarTablaMiembrosAInvitar(){
+        UsuariosMock usuariosMock = new UsuariosMock();
+        List<Usuario> usuariosDisponibles = usuariosMock.obtenerTodosLosUsuarios();
+    
+        DefaultTableModel modeloTabla = (DefaultTableModel) this.TablaUsuarios.getModel();
+        modeloTabla.setRowCount(0);
+        
+         for (Usuario usuario : usuariosDisponibles) {
+        Object[] fila = {
+            usuario.getNombre(),
+        };
+        modeloTabla.addRow(fila);
+    }
+    }
+    
+    public List<Usuario> seleccionarMiembros(){
+            int[] filasSeleccionadas = TablaUsuarios.getSelectedRows();
+            if (filasSeleccionadas.length == 0) {
+                
+                return null;
+            }
+       
+            List<Usuario> miembrosSeleccionados = new ArrayList<>();
+            DefaultTableModel modelo = (DefaultTableModel) TablaUsuarios.getModel();
+            
+            UsuariosMock usuariosMock = new UsuariosMock();
+            List<Usuario> todosLosUsuarios = usuariosMock.obtenerTodosLosUsuarios();
+            
+            for (int fila : filasSeleccionadas) {
+                String nombreSeleccionado = (String) modelo.getValueAt(fila, 0);
+
+                for (Usuario usuario : todosLosUsuarios) {
+                    if (usuario.getNombre().equalsIgnoreCase(nombreSeleccionado)) {
+                        miembrosSeleccionados.add(usuario);
+                        break; // Para evitar agregar duplicados si hay varios con mismo nombre
+                    }
+                }
+            }
+
+            return miembrosSeleccionados;
+    }
+    
+    public void crearGrupo(){
+        String nombreGrupo = this.txtNombreGrupo.getText();
+        
+        if (nombreGrupo.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "El nombre del grupo no puede estar vacío", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        List<Usuario> miembrosSeleccionados = seleccionarMiembros();
+        
+        if (miembrosSeleccionados == null || miembrosSeleccionados.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Debes seleccionar al menos un miembro para el grupo", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        List<String> nombresMiembros = new ArrayList<>();
+        for (Usuario u : miembrosSeleccionados) {
+            nombresMiembros.add(u.getNombre());
+        }
+        
+        GrupoDTO nuevoGrupoDTO = new GrupoDTO(nombreGrupo, nombresMiembros);
+        nuevoGrupoDTO.setMensajes(null);
+        controlador.registrarGrupo(nuevoGrupoDTO);
+
+        JOptionPane.showMessageDialog(this, "Grupo creado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
     }
 
     /**
@@ -37,14 +116,14 @@ public class frmCrearGrupo extends javax.swing.JFrame {
         BotonRegresar = new javax.swing.JButton();
         PanelPrincipal = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        txtNombreGrupo = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jButton1 = new javax.swing.JButton();
+        TablaUsuarios = new javax.swing.JTable();
+        BotonCrearGrupo = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(864, 558));
-        setPreferredSize(new java.awt.Dimension(864, 558));
 
         PanelBlanco.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -55,6 +134,11 @@ public class frmCrearGrupo extends javax.swing.JFrame {
         PanelLogo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/linklogo.png"))); // NOI18N
 
         BotonRegresar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/linkupbotonregresar.png"))); // NOI18N
+        BotonRegresar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BotonRegresarActionPerformed(evt);
+            }
+        });
 
         PanelPrincipal.setBackground(new java.awt.Color(253, 166, 179));
         PanelPrincipal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -62,17 +146,45 @@ public class frmCrearGrupo extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Arial Black", 0, 14)); // NOI18N
         jLabel1.setText("Nombre del grupo:");
 
-        jTextField1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(148, 63, 75)));
+        txtNombreGrupo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(148, 63, 75)));
 
         jLabel2.setFont(new java.awt.Font("Arial Black", 0, 14)); // NOI18N
         jLabel2.setText("Agregar miembros:");
 
         jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(148, 63, 75)));
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/linkupbotonsiguiente.png"))); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        TablaUsuarios.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        TablaUsuarios.setForeground(new java.awt.Color(148, 63, 75));
+        TablaUsuarios.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Nombre:"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        TablaUsuarios.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        jScrollPane1.setViewportView(TablaUsuarios);
+
+        BotonCrearGrupo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/linkupbotonsiguiente.png"))); // NOI18N
+        BotonCrearGrupo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                BotonCrearGrupoActionPerformed(evt);
             }
         });
 
@@ -85,12 +197,12 @@ public class frmCrearGrupo extends javax.swing.JFrame {
                 .addGroup(PanelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel2)
                     .addComponent(jLabel1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 348, Short.MAX_VALUE)
+                    .addComponent(txtNombreGrupo)
                     .addComponent(jScrollPane1))
                 .addContainerGap(43, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, PanelPrincipalLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1)
+                .addComponent(BotonCrearGrupo)
                 .addGap(17, 17, 17))
         );
         PanelPrincipalLayout.setVerticalGroup(
@@ -99,13 +211,13 @@ public class frmCrearGrupo extends javax.swing.JFrame {
                 .addGap(14, 14, 14)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtNombreGrupo, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(27, 27, 27)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jButton1)
+                .addComponent(BotonCrearGrupo)
                 .addContainerGap(17, Short.MAX_VALUE))
         );
 
@@ -122,7 +234,7 @@ public class frmCrearGrupo extends javax.swing.JFrame {
                         .addComponent(BotonRegresar)
                         .addGap(67, 67, 67)
                         .addComponent(PanelPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 250, Short.MAX_VALUE))
+                .addGap(0, 146, Short.MAX_VALUE))
         );
         PanelBlancoLayout.setVerticalGroup(
             PanelBlancoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -151,21 +263,29 @@ public class frmCrearGrupo extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void BotonCrearGrupoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonCrearGrupoActionPerformed
+        crearGrupo();
+        this.dispose();
+        controlador.mostrarVentanaPrincipalGrupos();
+    }//GEN-LAST:event_BotonCrearGrupoActionPerformed
+
+    private void BotonRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonRegresarActionPerformed
+        this.dispose();
+        controlador.mostrarVentanaPrincipalGrupos();
+    }//GEN-LAST:event_BotonRegresarActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton BotonCrearGrupo;
     private javax.swing.JButton BotonRegresar;
     private javax.swing.JPanel PanelBlanco;
     private javax.swing.JLabel PanelLogo;
     private javax.swing.JPanel PanelPrincipal;
     private javax.swing.JPanel PanelRosa;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JTable TablaUsuarios;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField txtNombreGrupo;
     // End of variables declaration//GEN-END:variables
 }

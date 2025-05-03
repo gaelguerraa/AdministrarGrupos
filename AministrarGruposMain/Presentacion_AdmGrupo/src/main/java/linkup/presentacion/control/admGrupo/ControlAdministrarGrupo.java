@@ -4,6 +4,13 @@
  */
 package linkup.presentacion.control.admGrupo;
 
+import java.util.ArrayList;
+import java.util.List;
+import linkup.dtosnegocio.admGrupo.GrupoDTO;
+import linkup.dtosnegocio.admGrupo.UsuariosMock;
+import linkup.dtosnegocio.mapper.admGrupo.GrupoMapper;
+import linkup.objetosNegocio.admGrupo.Grupo;
+import linkup.objetosNegocio.admGrupo.Usuario;
 import linkup.presentacion.admGrupo.frmCrearGrupo;
 import linkup.presentacion.admGrupo.frmGruposPrincipal;
 import linkup.presentacion.admGrupo.frmNuevoNombreGrupo;
@@ -25,8 +32,32 @@ public class ControlAdministrarGrupo {
     private frmUsuariosEliminar usuariosAEliminar;
     private frmNuevoNombreGrupo nuevoNombreGrupo;
     
-    public ControlAdministrarGrupo(){
+    
+    private List<Grupo> grupos;
+    private List<Usuario> usuariosDisponibles;
+    
+    public ControlAdministrarGrupo() {
+        this.grupos = new ArrayList<>();
+        this.usuariosDisponibles = new UsuariosMock().obtenerTodosLosUsuarios();
     }
+    
+    public void registrarGrupo(GrupoDTO grupoDTO) {
+        Grupo grupo = GrupoMapper.toEntidad(grupoDTO, usuariosDisponibles);
+        grupos.add(grupo);
+        System.out.println("Grupo creado: " + grupo.getNombre());
+    }
+
+    public List<Grupo> obtenerGrupos() {
+        return grupos;
+    }
+
+    public List<Usuario> getUsuariosDisponibles() {
+        return usuariosDisponibles;
+    }
+    
+    
+    
+    
     
     public static ControlAdministrarGrupo getInstancia(){
         if(instancia == null){
