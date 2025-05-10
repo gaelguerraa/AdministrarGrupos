@@ -4,6 +4,16 @@
  */
 package linkup.presentacion.admGrupo;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.time.LocalDateTime;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import linkup.dtosnegocio.admGrupo.NuevoMensajeDTO;
+import linkup.objetosNegocio.admGrupo.Grupo;
+import linkup.objetosNegocio.admGrupo.Mensaje;
+import linkup.objetosNegocio.admGrupo.Usuario;
 import linkup.presentacion.control.admGrupo.ControlAdministrarGrupo;
 
 /**
@@ -12,15 +22,72 @@ import linkup.presentacion.control.admGrupo.ControlAdministrarGrupo;
  */
 public class frmVerGrupo extends javax.swing.JFrame {
     
+    private Grupo grupo;
     public ControlAdministrarGrupo controlador;
 
     /**
      * Creates new form frmVerGrupo
      */
-    public frmVerGrupo(ControlAdministrarGrupo controlador) {
+    public frmVerGrupo(ControlAdministrarGrupo controlador, Grupo grupo) {
         this.controlador = controlador;
+        if (grupo == null) {
+            throw new IllegalArgumentException("El grupo no puede ser null");
+        }
+        this.grupo = grupo;
         initComponents();
-        setTitle("Grupo");
+        tablaMensajes.setTableHeader(null);
+        setTitle("Grupo: " + grupo.getNombre());
+        setLocationRelativeTo(null);
+        mostrarNombreGrupo();
+        actualizarMensajes();
+    }
+    
+    private void mostrarNombreGrupo() {
+        labelNombreGrupo.setText(grupo.getNombre()); 
+    }
+    
+    private void mandarMensaje(){
+        String contenido = txtEscribirMensaje.getText().trim();
+        if (contenido.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No puedes enviar un mensaje vacío.");
+            return;
+        }
+        
+        NuevoMensajeDTO dto = new NuevoMensajeDTO(contenido, LocalDateTime.now());
+        controlador.registrarMensaje(grupo, dto);
+        limpiarTxt();
+        actualizarMensajes();
+    }
+    
+    private void actualizarMensajes() {
+
+        DefaultTableModel modeloTabla = new DefaultTableModel(new Object[]{"Mensaje"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Hacer que todas las celdas no sean editables
+                return false;
+            }
+        };
+        modeloTabla.setRowCount(0);
+
+        for(Mensaje m : grupo.getMensajes()){
+            Object[] fila = {
+                m.getMensaje()
+            };
+            modeloTabla.addRow(fila);
+        }
+
+        this.tablaMensajes.setModel(modeloTabla); // Establecer el nuevo modelo no editable
+
+        Font fuente = new Font(tablaMensajes.getFont().getName(), Font.PLAIN, 18);
+        tablaMensajes.setFont(fuente);
+        tablaMensajes.setBackground(Color.WHITE);
+        tablaMensajes.setForeground(Color.BLACK);
+        tablaMensajes.setRowHeight(32);
+    }
+    
+    private void limpiarTxt(){
+        txtEscribirMensaje.setText("");
     }
 
     /**
@@ -38,12 +105,13 @@ public class frmVerGrupo extends javax.swing.JFrame {
         BotonRegresar = new javax.swing.JButton();
         PanelGrupoPrincipal = new javax.swing.JPanel();
         PanelSuperior = new javax.swing.JPanel();
-        jButton2 = new javax.swing.JButton();
-        txtNombreGrupo = new javax.swing.JTextField();
+        btnOpciones = new javax.swing.JButton();
+        labelNombreGrupo = new javax.swing.JLabel();
         PanelInferior = new javax.swing.JPanel();
         txtEscribirMensaje = new javax.swing.JTextField();
-        jButton3 = new javax.swing.JButton();
+        btnEnviarMensaje = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
+        tablaMensajes = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(864, 558));
@@ -57,17 +125,26 @@ public class frmVerGrupo extends javax.swing.JFrame {
         PanelLogo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/linklogo.png"))); // NOI18N
 
         BotonRegresar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/linkupbotonregresar.png"))); // NOI18N
+        BotonRegresar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BotonRegresarActionPerformed(evt);
+            }
+        });
 
         PanelGrupoPrincipal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         PanelSuperior.setBackground(new java.awt.Color(255, 255, 255));
         PanelSuperior.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/linkupbotonmenu.png"))); // NOI18N
+        btnOpciones.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/linkupbotonmenu.png"))); // NOI18N
+        btnOpciones.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOpcionesActionPerformed(evt);
+            }
+        });
 
-        txtNombreGrupo.setEditable(false);
-        txtNombreGrupo.setFont(new java.awt.Font("Arial Black", 0, 14)); // NOI18N
-        txtNombreGrupo.setText("Nombre Grupo");
+        labelNombreGrupo.setFont(new java.awt.Font("Futura Book", 0, 24)); // NOI18N
+        labelNombreGrupo.setText("nombreGrupo");
 
         javax.swing.GroupLayout PanelSuperiorLayout = new javax.swing.GroupLayout(PanelSuperior);
         PanelSuperior.setLayout(PanelSuperiorLayout);
@@ -75,29 +152,32 @@ public class frmVerGrupo extends javax.swing.JFrame {
             PanelSuperiorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, PanelSuperiorLayout.createSequentialGroup()
                 .addGap(76, 76, 76)
-                .addComponent(txtNombreGrupo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(labelNombreGrupo)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton2)
+                .addComponent(btnOpciones)
                 .addContainerGap())
         );
         PanelSuperiorLayout.setVerticalGroup(
             PanelSuperiorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(PanelSuperiorLayout.createSequentialGroup()
-                .addGroup(PanelSuperiorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(PanelSuperiorLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jButton2))
-                    .addGroup(PanelSuperiorLayout.createSequentialGroup()
-                        .addGap(21, 21, 21)
-                        .addComponent(txtNombreGrupo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap()
+                .addGroup(PanelSuperiorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(labelNombreGrupo)
+                    .addComponent(btnOpciones))
                 .addContainerGap(18, Short.MAX_VALUE))
         );
 
         PanelInferior.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        txtEscribirMensaje.setText("Escribir mensaje...");
+        txtEscribirMensaje.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtEscribirMensaje.setToolTipText("Escribir mensaje...");
 
-        jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/linkupbotonsiguiente.png"))); // NOI18N
+        btnEnviarMensaje.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/linkupbotonsiguiente.png"))); // NOI18N
+        btnEnviarMensaje.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEnviarMensajeActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout PanelInferiorLayout = new javax.swing.GroupLayout(PanelInferior);
         PanelInferior.setLayout(PanelInferiorLayout);
@@ -107,7 +187,7 @@ public class frmVerGrupo extends javax.swing.JFrame {
                 .addGap(14, 14, 14)
                 .addComponent(txtEscribirMensaje, javax.swing.GroupLayout.PREFERRED_SIZE, 504, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jButton3)
+                .addComponent(btnEnviarMensaje)
                 .addContainerGap(23, Short.MAX_VALUE))
         );
         PanelInferiorLayout.setVerticalGroup(
@@ -115,10 +195,21 @@ public class frmVerGrupo extends javax.swing.JFrame {
             .addGroup(PanelInferiorLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(PanelInferiorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton3)
+                    .addComponent(btnEnviarMensaje)
                     .addComponent(txtEscribirMensaje, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        tablaMensajes.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null}
+            },
+            new String [] {
+                "Title 1"
+            }
+        ));
+        tablaMensajes.setTableHeader(null);
+        jScrollPane1.setViewportView(tablaMensajes);
 
         javax.swing.GroupLayout PanelGrupoPrincipalLayout = new javax.swing.GroupLayout(PanelGrupoPrincipal);
         PanelGrupoPrincipal.setLayout(PanelGrupoPrincipalLayout);
@@ -181,6 +272,20 @@ public class frmVerGrupo extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void BotonRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonRegresarActionPerformed
+        this.dispose();
+        controlador.mostrarVentanaPrincipalGrupos();
+    }//GEN-LAST:event_BotonRegresarActionPerformed
+
+    private void btnOpcionesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOpcionesActionPerformed
+        this.dispose();
+        controlador.verOpcionesGrupo(grupo);
+    }//GEN-LAST:event_btnOpcionesActionPerformed
+
+    private void btnEnviarMensajeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnviarMensajeActionPerformed
+        mandarMensaje();
+    }//GEN-LAST:event_btnEnviarMensajeActionPerformed
+
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -191,10 +296,11 @@ public class frmVerGrupo extends javax.swing.JFrame {
     private javax.swing.JLabel PanelLogo;
     private javax.swing.JPanel PanelRosa;
     private javax.swing.JPanel PanelSuperior;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton btnEnviarMensaje;
+    private javax.swing.JButton btnOpciones;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel labelNombreGrupo;
+    private javax.swing.JTable tablaMensajes;
     private javax.swing.JTextField txtEscribirMensaje;
-    private javax.swing.JTextField txtNombreGrupo;
     // End of variables declaration//GEN-END:variables
 }

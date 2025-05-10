@@ -4,6 +4,14 @@
  */
 package linkup.presentacion.admGrupo;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.List;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import linkup.objetosNegocio.admGrupo.Grupo;
 import linkup.presentacion.control.admGrupo.ControlAdministrarGrupo;
 
 /**
@@ -21,6 +29,61 @@ public class frmGruposPrincipal extends javax.swing.JFrame {
         this.controlador = controlador;
         initComponents();
         setTitle("Grupos");
+        setLocationRelativeTo(null);
+        mostrarGrupos();
+        tblGrupos.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent evt) {
+            int filaSeleccionada = tblGrupos.getSelectedRow();
+            if (filaSeleccionada >= 0) {
+                String nombreGrupo = tblGrupos.getValueAt(filaSeleccionada, 0).toString();
+                Grupo grupoSeleccionado = controlador.obtenerGrupoPorNombre(nombreGrupo);
+                if (grupoSeleccionado != null) {
+                    controlador.accederGrupo(grupoSeleccionado);
+                    dispose(); // opcional, si quieres cerrar esta ventana al entrar
+                }
+            }
+        }
+    });
+    }
+    
+    public void mostrarGrupos(){
+        List<Grupo> grupos = controlador.obtenerGrupos();
+        
+        String[] columnas = {"Grupos"};
+        DefaultTableModel modelo = new DefaultTableModel(columnas, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            // Hacer que todas las celdas no sean editables
+            return false;
+        }
+        };
+
+        for (Grupo grupo : grupos) {
+            String nombre = grupo.getNombre();
+            modelo.addRow(new Object[]{nombre});
+        }
+
+        tblGrupos.setModel(modelo);
+        
+        Font fuenteGrande = new Font(tblGrupos.getFont().getName(), Font.PLAIN, 18); // Puedes ajustar el tamaño a tu gusto
+        tblGrupos.setFont(fuenteGrande);
+        tblGrupos.getTableHeader().setFont(fuenteGrande); // También aumentar la fuente del encabezado
+
+        // Aumentar el tamaño de las filas
+        tblGrupos.setRowHeight(50); // Puedes ajustar la altura a tu gusto
+
+        // Establecer el color de fondo de la tabla a morado
+        tblGrupos.setBackground(Color.WHITE); // Color morado (RGB)
+        tblGrupos.setForeground(new Color(102, 0, 102)); // Color del texto en blanco para que contraste
+
+        // Establecer el color de fondo del encabezado a un morado más oscuro (opcional)
+        JTableHeader header = tblGrupos.getTableHeader();
+        header.setBackground(new Color(102, 0, 102));
+        header.setForeground(Color.WHITE);
+
+        // Asegúrate de que el scroll tenga agregada la tabla correctamente
+        scrollGrupos.setViewportView(tblGrupos);
     }
 
     /**
@@ -37,7 +100,8 @@ public class frmGruposPrincipal extends javax.swing.JFrame {
         PanelLogo = new javax.swing.JLabel();
         PanelMisGrupos = new javax.swing.JLabel();
         btnCrearGrupo = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        scrollGrupos = new javax.swing.JScrollPane();
+        tblGrupos = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(864, 558));
@@ -60,7 +124,32 @@ public class frmGruposPrincipal extends javax.swing.JFrame {
             }
         });
 
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(148, 63, 75)));
+        scrollGrupos.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(148, 63, 75)));
+
+        tblGrupos.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Grupos"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        scrollGrupos.setViewportView(tblGrupos);
 
         javax.swing.GroupLayout PanelBlancoLayout = new javax.swing.GroupLayout(PanelBlanco);
         PanelBlanco.setLayout(PanelBlancoLayout);
@@ -71,7 +160,7 @@ public class frmGruposPrincipal extends javax.swing.JFrame {
                 .addGroup(PanelBlancoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(PanelBlancoLayout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 63, Short.MAX_VALUE)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 685, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(scrollGrupos, javax.swing.GroupLayout.PREFERRED_SIZE, 685, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(PanelBlancoLayout.createSequentialGroup()
                         .addGap(26, 26, 26)
                         .addGroup(PanelBlancoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -92,7 +181,7 @@ public class frmGruposPrincipal extends javax.swing.JFrame {
                     .addComponent(btnCrearGrupo)
                     .addComponent(PanelMisGrupos))
                 .addGap(27, 27, 27)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 348, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(scrollGrupos, javax.swing.GroupLayout.PREFERRED_SIZE, 348, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(51, Short.MAX_VALUE))
         );
 
@@ -122,6 +211,7 @@ public class frmGruposPrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel PanelMisGrupos;
     private javax.swing.JPanel PanelRosa;
     private javax.swing.JButton btnCrearGrupo;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane scrollGrupos;
+    private javax.swing.JTable tblGrupos;
     // End of variables declaration//GEN-END:variables
 }

@@ -23,6 +23,13 @@ public class Mensaje {
         this.fechaEnvio = fechaEnvio;
     }
 
+    public Mensaje(String contenido, LocalDateTime fechaEnvio) {
+        this.contenido = contenido;
+        this.fechaEnvio = fechaEnvio;
+    }
+    
+    
+
     public Usuario getUsuario() {
         return usuario;
     }
@@ -43,6 +50,12 @@ public class Mensaje {
     public String toString() {
         return "Mensaje{" + "usuario=" + usuario + ", grupo=" + grupo + ", contenido=" + contenido + ", fechaEnvio=" + fechaEnvio + '}';
     }
+    
+    public String getMensaje(){
+        return contenido + "  -  " +fechaEnvio;
+    }
+    
+    
     
     
 }

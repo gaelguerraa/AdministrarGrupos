@@ -23,6 +23,11 @@ public class Grupo {
         this.miembros = miembros;
         this.mensajes = mensajes;
     }
+    
+
+    public void agregarMensaje(Mensaje mensaje) {
+        mensajes.add(mensaje);
+    }
 
     public String getNombre() {
         return nombre;
@@ -39,6 +44,23 @@ public class Grupo {
     public List<Mensaje> getMensajes() {
         return mensajes;
     }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setFechaCreaciom(LocalDateTime fechaCreaciom) {
+        this.fechaCreaciom = fechaCreaciom;
+    }
+
+    public void setMiembros(List<Usuario> miembros) {
+        this.miembros = miembros;
+    }
+
+    public void setMensajes(List<Mensaje> mensajes) {
+        this.mensajes = mensajes;
+    }
+    
     
     
 }

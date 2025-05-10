@@ -8,6 +8,7 @@ package linkup.presentacion.admGrupo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 import linkup.dtosnegocio.admGrupo.GrupoDTO;
 import linkup.dtosnegocio.admGrupo.UsuariosMock;
@@ -28,22 +29,27 @@ public class frmCrearGrupo extends javax.swing.JFrame {
     public frmCrearGrupo(ControlAdministrarGrupo controlador) {
         this.controlador = controlador;
         initComponents();
+        //this.TablaUsuarios.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        setTitle("Crear Grupo");
+        setLocationRelativeTo(null);
         LlenarTablaMiembrosAInvitar();
     }
     
-    public void LlenarTablaMiembrosAInvitar(){
+   public void LlenarTablaMiembrosAInvitar(){
         UsuariosMock usuariosMock = new UsuariosMock();
         List<Usuario> usuariosDisponibles = usuariosMock.obtenerTodosLosUsuarios();
-    
+
         DefaultTableModel modeloTabla = (DefaultTableModel) this.TablaUsuarios.getModel();
         modeloTabla.setRowCount(0);
-        
-         for (Usuario usuario : usuariosDisponibles) {
-        Object[] fila = {
-            usuario.getNombre(),
-        };
-        modeloTabla.addRow(fila);
-    }
+
+        TablaUsuarios.setRowHeight(30);
+
+        for (Usuario usuario : usuariosDisponibles) {
+            Object[] fila = {
+                usuario.getNombre(),
+            };
+            modeloTabla.addRow(fila);
+        }
     }
     
     public List<Usuario> seleccionarMiembros(){
@@ -146,12 +152,14 @@ public class frmCrearGrupo extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Arial Black", 0, 14)); // NOI18N
         jLabel1.setText("Nombre del grupo:");
 
+        txtNombreGrupo.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         txtNombreGrupo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(148, 63, 75)));
 
         jLabel2.setFont(new java.awt.Font("Arial Black", 0, 14)); // NOI18N
         jLabel2.setText("Agregar miembros:");
 
         jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(148, 63, 75)));
+        jScrollPane1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
 
         TablaUsuarios.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
         TablaUsuarios.setForeground(new java.awt.Color(148, 63, 75));
@@ -178,6 +186,7 @@ public class frmCrearGrupo extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        TablaUsuarios.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         TablaUsuarios.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         jScrollPane1.setViewportView(TablaUsuarios);
 

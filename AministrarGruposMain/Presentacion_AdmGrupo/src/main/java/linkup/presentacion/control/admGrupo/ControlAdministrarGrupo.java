@@ -4,18 +4,22 @@
  */
 package linkup.presentacion.control.admGrupo;
 
+import ISubsistema.IAdministrarGrupo;
+import Subsistema.AdministrarGrupo;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import linkup.dtosnegocio.admGrupo.GrupoDTO;
+import linkup.dtosnegocio.admGrupo.NuevoMensajeDTO;
 import linkup.dtosnegocio.admGrupo.UsuariosMock;
 import linkup.dtosnegocio.mapper.admGrupo.GrupoMapper;
+import linkup.dtosnegocio.mapper.admGrupo.MensajeMapper;
 import linkup.objetosNegocio.admGrupo.Grupo;
+import linkup.objetosNegocio.admGrupo.Mensaje;
 import linkup.objetosNegocio.admGrupo.Usuario;
 import linkup.presentacion.admGrupo.frmCrearGrupo;
 import linkup.presentacion.admGrupo.frmGruposPrincipal;
-import linkup.presentacion.admGrupo.frmNuevoNombreGrupo;
 import linkup.presentacion.admGrupo.frmOpcionesGrupo;
-import linkup.presentacion.admGrupo.frmUsuariosEliminar;
 import linkup.presentacion.admGrupo.frmVerGrupo;
 
 /**
@@ -24,15 +28,13 @@ import linkup.presentacion.admGrupo.frmVerGrupo;
  */
 public class ControlAdministrarGrupo {
     private static ControlAdministrarGrupo instancia;
+    private static IAdministrarGrupo administradorGrupos = new AdministrarGrupo(); 
     
     private frmGruposPrincipal gruposPrincipal;
     private frmVerGrupo verGrupo;
     private frmOpcionesGrupo opcionesGrupo;
     private frmCrearGrupo crearGrupo;
-    private frmUsuariosEliminar usuariosAEliminar;
-    private frmNuevoNombreGrupo nuevoNombreGrupo;
-    
-    
+     
     private List<Grupo> grupos;
     private List<Usuario> usuariosDisponibles;
     
@@ -46,6 +48,11 @@ public class ControlAdministrarGrupo {
         grupos.add(grupo);
         System.out.println("Grupo creado: " + grupo.getNombre());
     }
+    
+    public void registrarMensaje(Grupo grupo, NuevoMensajeDTO nuevoMensaje){
+        Mensaje mensaje = MensajeMapper.toEntidad(nuevoMensaje);
+        grupo.getMensajes().add(mensaje);
+    }
 
     public List<Grupo> obtenerGrupos() {
         return grupos;
@@ -55,8 +62,32 @@ public class ControlAdministrarGrupo {
         return usuariosDisponibles;
     }
     
+    public Grupo obtenerGrupoPorNombre(String nombre) {
+        for (Grupo grupo : grupos) {
+            if (grupo.getNombre().equals(nombre)) {
+                return grupo;
+            }
+        }
+        return null;
+    }
+     
+    public void eliminarUsuario(Grupo grupo, Usuario usuario){
+        administradorGrupos.eliminarUsuarioDeGrupo(grupo, usuario);
+    } 
     
-    
+    public void eliminarGrupo(Grupo grupo) {
+        administradorGrupos.eliminarGrupo(grupo, this.grupos);
+    }
+
+    public void cambiarNombreGrupo(Grupo grupo, String nuevoNombre){
+         for (Grupo g : obtenerGrupos()) {
+            if (!g.equals(grupo) && g.getNombre().equalsIgnoreCase(nuevoNombre)) {
+                JOptionPane.showMessageDialog(null, "Ya existe un grupo con ese nombre.");
+            return;
+            }
+        }
+        administradorGrupos.cambiarNombreGrupo(grupo, nuevoNombre);
+    }
     
     
     public static ControlAdministrarGrupo getInstancia(){
@@ -80,24 +111,16 @@ public class ControlAdministrarGrupo {
         crearGrupo.setVisible(true);
     }
     
-    public void accederGrupo(){
-        verGrupo = new frmVerGrupo(this);
+    public void accederGrupo(Grupo grupo) {
+        frmVerGrupo verGrupo = new frmVerGrupo(this, grupo);
         verGrupo.setVisible(true);
     }
+
     
-    public void verOpcionesGrupo(){
-        opcionesGrupo = new frmOpcionesGrupo(this);
+    public void verOpcionesGrupo(Grupo grupo){
+        opcionesGrupo = new frmOpcionesGrupo(this, grupo);
         opcionesGrupo.setVisible(true); 
     }
     
-    public void ventanaEliminarUsuario(){
-        usuariosAEliminar = new frmUsuariosEliminar(this);
-        usuariosAEliminar.setVisible(true);
-    }
-    
-    public void ventanaNuevoNombreGrupo(){
-        nuevoNombreGrupo = new frmNuevoNombreGrupo(this);
-        nuevoNombreGrupo.setVisible(true);
-    }
     
 }

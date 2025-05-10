@@ -9,6 +9,7 @@
         <module>Presentacion_AdmGrupo</module>
         <module>Objetos_Negocio</module>
         <module>DTO_Negocio</module>
+        <module>Negocios_EliminarGrupo</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
